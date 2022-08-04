@@ -30,7 +30,7 @@ namespace StoreServiceAPI.Controllers
             return Ok(results);
         }
 
-        [HttpGet("{id:int}/{name:string}", Name = "GetStore")]
+        [HttpGet("{id:int}/{name}", Name = "GetStore")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetStoreByNameAndSapNumber(int id, string name)
