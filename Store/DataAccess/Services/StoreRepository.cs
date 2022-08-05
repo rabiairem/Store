@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using StoreServiceAPI.DbContexts;
-using StoreServiceAPI.Entities;
+using StoreServiceAPI.DataAccess.DbContexts;
+using StoreServiceAPI.DataAccess.Entities;
 using StoreServiceAPI.Models;
 
-namespace StoreServiceAPI.Repository
+namespace StoreServiceAPI.DataAccess.Services
 {
     public class StoreRepository : IStoreRepository
     {
@@ -17,35 +17,29 @@ namespace StoreServiceAPI.Repository
             _mapper = mapper;
         }
 
-        public async Task<StoreDTO> CreateStoreAsync(StoreDTO storeDto)
+        public async Task<Store> CreateStoreAsync(StoreDTO storeDto)
         {
             var store = _mapper.Map<Store>(storeDto);
 
             if (await GetStoreBySapNumberAsync(store.SapNumber_id) == null)
                 await _db.Stores.AddAsync(store);
-            else
-                _db.Stores.Update(store);
 
             await _db.SaveChangesAsync();
-            return _mapper.Map(store, storeDto);
+            return store;
         }
 
-        public async Task<IEnumerable<StoreDTO>> CreateStoresAsync(IEnumerable<StoreDTO> storeDTOs)
+        public async Task<IEnumerable<Store>> CreateStoresAsync(IEnumerable<StoreDTO> storeDTOs)
         {
             var stores = _mapper.Map<IEnumerable<Store>>(storeDTOs);
 
-            var dataForUpdate = stores.Where(s => _db.Stores.AsQueryable().AsNoTracking().Contains(s));
-            var dataForAdd = stores.Where(s => !_db.Stores.AsQueryable().AsNoTracking().Contains(s));
-
-            if (dataForUpdate != null)
-                _db.Stores.UpdateRange(dataForUpdate);
+            var dataForAdd = stores.Where(s => !_db.Stores.AsQueryable().AsNoTracking().Contains(s)).ToList();
 
             if (dataForAdd != null)
                 await _db.Stores.AddRangeAsync(dataForAdd);
 
             await _db.SaveChangesAsync();
 
-            return _mapper.Map(stores, storeDTOs);
+            return dataForAdd;
         }
 
         public async Task<bool> DeleteStoreAsync(int storeSapNumber)
@@ -68,26 +62,26 @@ namespace StoreServiceAPI.Repository
             }
         }
 
-        public async Task<StoreDTO> GetStoreByNameAndSapNumberAsync(int storeSapNumber, string name)
+        public async Task<Store> GetStoreByNameAndSapNumberAsync(int storeSapNumber, string name)
         {
             Store store = await _db.Stores.Where(x => x.SapNumber_id ==
             storeSapNumber && x.Name == name).AsNoTracking().FirstOrDefaultAsync();
-            return _mapper.Map<StoreDTO>(store);
+
+            return store;
         }
 
-        public async Task<StoreDTO> GetStoreBySapNumberAsync(int sapNumber)
+        public async Task<Store> GetStoreBySapNumberAsync(int sapNumber)
         {
             Store store = await _db.Stores.Where(x => x.SapNumber_id == sapNumber).AsNoTracking().FirstOrDefaultAsync();
-            return _mapper.Map<StoreDTO>(store);
+            return store;
         }
 
-        public async Task<IEnumerable<StoreDTO>> GetStoresAsync()
+        public async Task<IEnumerable<Store>> GetStoresAsync()
         {
-            List<Store> storeList = await _db.Stores.AsNoTracking().ToListAsync();
-            return _mapper.Map<List<StoreDTO>>(storeList);
+            return await _db.Stores.AsNoTracking().ToListAsync();
         }
 
-        public async Task<StoreDTO> UpdateStoreAsync(StoreDTO storeDto)
+        public async Task<Store> UpdateStoreAsync(StoreDTO storeDto)
         {
             var store = _mapper.Map<Store>(storeDto);
 
@@ -97,7 +91,7 @@ namespace StoreServiceAPI.Repository
                 await _db.SaveChangesAsync();
             }
 
-            return _mapper.Map(store, storeDto);
+            return store;
         }
     }
 }

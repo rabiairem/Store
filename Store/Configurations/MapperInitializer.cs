@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using StoreServiceAPI.Models;
-using StoreServiceAPI.Entities;
+using StoreServiceAPI.DataAccess.Entities;
 
 namespace StoreServiceAPI.Configurations
 {

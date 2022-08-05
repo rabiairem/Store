@@ -4,8 +4,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StoreServiceAPI;
 using StoreServiceAPI.Configurations;
-using StoreServiceAPI.DbContexts;
-using StoreServiceAPI.Repository;
+using StoreServiceAPI.DataAccess.DbContexts;
+using StoreServiceAPI.DataAccess.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers().AddNewtonsoftJson(op => op.SerializerSettings.ReferenceLoopHandling =
@@ -70,7 +70,7 @@ builder.Services.AddSingleton(mapper);
 
 builder.Services.ConfigureVersioning();
 
-builder.Services.AddTransient<IStoreRepository, StoreRepository>();
+builder.Services.AddScoped<IStoreRepository, StoreRepository>();
 
 var app = builder.Build();
 

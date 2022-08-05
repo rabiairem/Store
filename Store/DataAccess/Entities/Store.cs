@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace StoreServiceAPI.Entities
+namespace StoreServiceAPI.DataAccess.Entities
 {
     public class Store
     {

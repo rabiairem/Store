@@ -1,12 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
+using StoreServiceAPI.DataAccess.Services;
 using StoreServiceAPI.Models;
-using StoreServiceAPI.Repository;
 
 namespace StoreServiceAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/storeservice")]
     [ApiController]
     public class StoreServiceAPIController : ControllerBase
     {
@@ -35,9 +35,9 @@ namespace StoreServiceAPI.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetStoreByNameAndSapNumber(int id, string name)
         {
-            StoreDTO storeDTO = await _storeRepository.GetStoreByNameAndSapNumberAsync(id, name);
+            var store = await _storeRepository.GetStoreByNameAndSapNumberAsync(id, name);
 
-            return Ok(storeDTO);
+            return Ok(_mapper.Map<StoreDTO>(store));
         }
 
         [HttpPost("CreateStore", Name = "CreateStore")]
@@ -49,9 +49,9 @@ namespace StoreServiceAPI.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var storeDtoFromDb = await _storeRepository.CreateStoreAsync(storeDTO);
+            var storeFromDb = await _storeRepository.CreateStoreAsync(storeDTO);
 
-            return Ok(storeDtoFromDb);
+            return Ok(_mapper.Map(storeFromDb, storeDTO));
         }
 
         private async Task<IEnumerable<StoreDTO>> GetStoresFromJson()
@@ -67,17 +67,20 @@ namespace StoreServiceAPI.Controllers
             return result;
         }
 
-        [HttpPost("CreateOrUpdateStoresFromJson", Name = "CreateOrUpdateStoresFromJson")]
+        [HttpPost("CreateStoresFromJson", Name = "CreateStoresFromJson")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> CreateOrUpdateStoresFromJson()
+        public async Task<IActionResult> CreateStoresFromJson()
         {
             var storesFromJson = await GetStoresFromJson();
 
-            var storesDtoFromDb = await _storeRepository.CreateStoresAsync(storesFromJson);
+            var storesFromDb = await _storeRepository.CreateStoresAsync(storesFromJson);
 
-            return Ok(storesDtoFromDb);
+            if (storesFromDb == null || !storesFromDb.Any())
+                return BadRequest("There is nothing to add");
+
+            return Ok(_mapper.Map<IEnumerable<StoreDTO>>(storesFromDb));
         }
 
         [HttpPut("{id:int}")]
@@ -99,7 +102,7 @@ namespace StoreServiceAPI.Controllers
 
             var storeDb = await _storeRepository.UpdateStoreAsync(storeDTO);
 
-            return Ok(storeDb);
+            return Ok(_mapper.Map(storeDb, storeDTO));
         }
 
         [HttpDelete("{id:int}")]
@@ -109,6 +112,7 @@ namespace StoreServiceAPI.Controllers
         public async Task<IActionResult> DeleteStore(int id)
         {
             var store = await _storeRepository.GetStoreBySapNumberAsync(id);
+
             if (store == null)
             {
                 return BadRequest("Submitted data is invalid");
