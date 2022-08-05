@@ -21,11 +21,31 @@ namespace StoreServiceAPI.Repository
         {
             var store = _mapper.Map<Store>(storeDto);
 
-            if (GetStoreBySapNumberAsync(store.SapNumber_id) == null)
-                _db.Stores.Add(store);
+            if (await GetStoreBySapNumberAsync(store.SapNumber_id) == null)
+                await _db.Stores.AddAsync(store);
+            else
+                _db.Stores.Update(store);
 
             await _db.SaveChangesAsync();
             return _mapper.Map(store, storeDto);
+        }
+
+        public async Task<IEnumerable<StoreDTO>> CreateStoresAsync(IEnumerable<StoreDTO> storeDTOs)
+        {
+            var stores = _mapper.Map<IEnumerable<Store>>(storeDTOs);
+
+            var dataForUpdate = stores.Where(s => _db.Stores.AsQueryable().AsNoTracking().Contains(s));
+            var dataForAdd = stores.Where(s => !_db.Stores.AsQueryable().AsNoTracking().Contains(s));
+
+            if (dataForUpdate != null)
+                _db.Stores.UpdateRange(dataForUpdate);
+
+            if (dataForAdd != null)
+                await _db.Stores.AddRangeAsync(dataForAdd);
+
+            await _db.SaveChangesAsync();
+
+            return _mapper.Map(stores, storeDTOs);
         }
 
         public async Task<bool> DeleteStoreAsync(int storeSapNumber)
@@ -71,7 +91,7 @@ namespace StoreServiceAPI.Repository
         {
             var store = _mapper.Map<Store>(storeDto);
 
-            if (GetStoreBySapNumberAsync(store.SapNumber_id) != null)
+            if (await GetStoreBySapNumberAsync(store.SapNumber_id) != null)
             {
                 _db.Update(store);
                 await _db.SaveChangesAsync();

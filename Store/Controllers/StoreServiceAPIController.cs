@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using StoreServiceAPI.Entities;
+using Newtonsoft.Json;
 using StoreServiceAPI.Models;
 using StoreServiceAPI.Repository;
 
@@ -19,7 +18,7 @@ namespace StoreServiceAPI.Controllers
             _mapper = mapper;
         }
 
-        [HttpGet]
+        [HttpGet(Name = "GetStores")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetStores()
@@ -32,6 +31,7 @@ namespace StoreServiceAPI.Controllers
 
         [HttpGet("{id:int}/{name}", Name = "GetStore")]
         [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetStoreByNameAndSapNumber(int id, string name)
         {
@@ -40,23 +40,45 @@ namespace StoreServiceAPI.Controllers
             return Ok(storeDTO);
         }
 
-
-        [HttpPost]
+        [HttpPost("CreateStore", Name = "CreateStore")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateStore([FromBody] StoreDTO storeDTO)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
             var storeDtoFromDb = await _storeRepository.CreateStoreAsync(storeDTO);
 
             return Ok(storeDtoFromDb);
         }
 
+        private async Task<IEnumerable<StoreDTO>> GetStoresFromJson()
+        {
+            var result = new List<StoreDTO>();
+
+            using (StreamReader r = new StreamReader("stores.json"))
+            {
+                string json = await r.ReadToEndAsync();
+                result = JsonConvert.DeserializeObject<List<StoreDTO>>(json);
+            }
+
+            return result;
+        }
+
+        [HttpPost("CreateOrUpdateStoresFromJson", Name = "CreateOrUpdateStoresFromJson")]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> CreateOrUpdateStoresFromJson()
+        {
+            var storesFromJson = await GetStoresFromJson();
+
+            var storesDtoFromDb = await _storeRepository.CreateStoresAsync(storesFromJson);
+
+            return Ok(storesDtoFromDb);
+        }
 
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -79,7 +101,6 @@ namespace StoreServiceAPI.Controllers
 
             return Ok(storeDb);
         }
-
 
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

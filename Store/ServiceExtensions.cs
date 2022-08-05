@@ -1,9 +1,6 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
-using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
-using System.Text;
 
 namespace StoreServiceAPI
 {
@@ -18,22 +15,6 @@ namespace StoreServiceAPI
                 opt.DefaultApiVersion = new ApiVersion(1, 0);
                 opt.ApiVersionReader = new HeaderApiVersionReader("api-version");//header ile belirtilebilir
             });
-        }
-
-        public static void ConfigureHttpCacheHeaders(this IServiceCollection services)
-        {
-            services.AddResponseCaching();
-            services.AddHttpCacheHeaders(
-                (expirationOpt) =>
-                {
-                    expirationOpt.MaxAge = 120;
-                    expirationOpt.CacheLocation = Marvin.Cache.Headers.CacheLocation.Private;
-                },
-                (validationOpt) =>
-                {
-                    validationOpt.MustRevalidate = true;
-                }
-            );
         }
 
         public static void ConfigureAutoMapper(this IServiceCollection services)

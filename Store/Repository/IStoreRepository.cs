@@ -8,6 +8,7 @@ namespace StoreServiceAPI.Repository
         Task<StoreDTO> GetStoreByNameAndSapNumberAsync(int sapNumber, string name);
         Task<StoreDTO> GetStoreBySapNumberAsync(int sapNumber);
         Task<StoreDTO> CreateStoreAsync(StoreDTO storeDto);
+        Task<IEnumerable<StoreDTO>> CreateStoresAsync(IEnumerable<StoreDTO> results);
         Task<StoreDTO> UpdateStoreAsync(StoreDTO storeDto);
         Task<bool> DeleteStoreAsync(int storeId);
     }

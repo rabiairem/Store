@@ -8,18 +8,8 @@ using StoreServiceAPI.DbContexts;
 using StoreServiceAPI.Repository;
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-builder.Services.AddControllers(config =>
-{
-    config.CacheProfiles.Add("120SecondsDuration", new Microsoft.AspNetCore.Mvc.CacheProfile
-    {
-        Duration = 120
-    });
-}).AddNewtonsoftJson(op => op.SerializerSettings.ReferenceLoopHandling =
+builder.Services.AddControllers().AddNewtonsoftJson(op => op.SerializerSettings.ReferenceLoopHandling =
 Newtonsoft.Json.ReferenceLoopHandling.Ignore);
-
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 
@@ -75,15 +65,12 @@ builder.Services.AddCors(o =>
        AllowAnyHeader());
 });
 
-builder.Services.AddResponseCaching();
-
 IMapper mapper = MapperInitializer.RegisterMaps().CreateMapper();
 builder.Services.AddSingleton(mapper);
 
 builder.Services.ConfigureVersioning();
-builder.Services.ConfigureHttpCacheHeaders();
 
-builder.Services.AddScoped<IStoreRepository, StoreRepository>();
+builder.Services.AddTransient<IStoreRepository, StoreRepository>();
 
 var app = builder.Build();
 
@@ -91,17 +78,18 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("v1/swagger.json", "V1 Docs");
+
+        c.DisplayRequestDuration();
+    });
 }
 
 app.UseCors("AllowAll");
 
 
 app.UseHttpsRedirection();
-
-app.UseResponseCaching();
-app.UseHttpCacheHeaders();
-
 
 app.UseAuthentication();
 app.UseAuthorization();
