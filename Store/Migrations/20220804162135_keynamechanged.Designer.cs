@@ -11,8 +11,8 @@ using StoreServiceAPI.DbContexts;
 namespace StoreServiceAPI.Migrations
 {
     [DbContext(typeof(DataBaseContext))]
-    [Migration("20220804152311_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20220804162135_keynamechanged")]
+    partial class keynamechanged
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -25,11 +25,9 @@ namespace StoreServiceAPI.Migrations
 
             modelBuilder.Entity("StoreServiceAPI.Entities.Store", b =>
                 {
-                    b.Property<int>("SapNumber")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("SapNumber"), 1L, 1);
+                    b.Property<int>("SapNumber_id")
+                        .HasColumnType("int")
+                        .HasColumnName("SapNumber_id");
 
                     b.Property<string>("Abbreviation")
                         .HasColumnType("nvarchar(max)");
@@ -56,7 +54,7 @@ namespace StoreServiceAPI.Migrations
                     b.Property<int>("SmsStoreNumber")
                         .HasColumnType("int");
 
-                    b.HasKey("SapNumber");
+                    b.HasKey("SapNumber_id");
 
                     b.ToTable("Stores");
                 });

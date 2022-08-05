@@ -4,7 +4,7 @@
 
 namespace StoreServiceAPI.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class keynamechanged : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -12,8 +12,7 @@ namespace StoreServiceAPI.Migrations
                 name: "Stores",
                 columns: table => new
                 {
-                    SapNumber = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SapNumber_id = table.Column<int>(type: "int", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Abbreviation = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SmsStoreNumber = table.Column<int>(type: "int", nullable: false),
@@ -25,7 +24,7 @@ namespace StoreServiceAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Stores", x => x.SapNumber);
+                    table.PrimaryKey("PK_Stores", x => x.SapNumber_id);
                 });
         }
 

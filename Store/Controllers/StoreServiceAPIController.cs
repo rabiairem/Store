@@ -40,7 +40,7 @@ namespace StoreServiceAPI.Controllers
             return Ok(storeDTO);
         }
 
-        [Authorize]
+
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status201Created)]
@@ -52,13 +52,12 @@ namespace StoreServiceAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var store = _mapper.Map<Store>(storeDTO);
-            await _storeRepository.CreateStoreAsync(storeDTO);
+            var storeDtoFromDb = await _storeRepository.CreateStoreAsync(storeDTO);
 
-            return CreatedAtRoute("CreateStore", new { id = store.SapNumber, name = store.Name }, store);
+            return Ok(storeDtoFromDb);
         }
 
-        [Authorize]
+
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -76,18 +75,17 @@ namespace StoreServiceAPI.Controllers
                 return BadRequest("Submitted data is invalid");
             }
 
-            _mapper.Map(storeDTO, store);
-            await _storeRepository.UpdateStoreAsync(store);
+            var storeDb = await _storeRepository.UpdateStoreAsync(storeDTO);
 
-            return NoContent();
+            return Ok(storeDb);
         }
 
-        [Authorize]
+
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> DeleteHotel(int id)
+        public async Task<IActionResult> DeleteStore(int id)
         {
             var store = await _storeRepository.GetStoreBySapNumberAsync(id);
             if (store == null)
@@ -95,9 +93,9 @@ namespace StoreServiceAPI.Controllers
                 return BadRequest("Submitted data is invalid");
             }
 
-            await _storeRepository.DeleteStoreAsync(id);
+            var result = await _storeRepository.DeleteStoreAsync(id);
 
-            return NoContent();
+            return Ok(result);
         }
     }
 }

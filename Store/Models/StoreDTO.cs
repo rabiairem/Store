@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace StoreServiceAPI.Models
 {
@@ -13,7 +14,7 @@ namespace StoreServiceAPI.Models
 
         public string Abbreviation { get; set; }
 
-        public int SmsStoreNumber { get; set; }
+        public int? SmsStoreNumber { get; set; }
 
         public bool IsFranchise { get; set; }
 
@@ -21,7 +22,7 @@ namespace StoreServiceAPI.Models
         public string PostalCode { get; set; }
 
         public string Province { get; set; }
-        public int FlowersModule { get; set; }
+        public int? FlowersModule { get; set; }
 
         public bool IsOpenOnSunday { get; set; }
     }

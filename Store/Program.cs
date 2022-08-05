@@ -1,6 +1,9 @@
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using StoreServiceAPI;
+using StoreServiceAPI.Configurations;
 using StoreServiceAPI.DbContexts;
 using StoreServiceAPI.Repository;
 
@@ -23,27 +26,29 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(opt =>
 {
     opt.SwaggerDoc("v1", new OpenApiInfo { Title = "MyStoreServiceAPI", Version = "v1" });
-    opt.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    opt.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
     {
-        In = ParameterLocation.Header,
-        Description = "Please enter token",
+        Description = @"Enter 'Bearer' [space] and your token",
         Name = "Authorization",
-        Type = SecuritySchemeType.Http,
-        BearerFormat = "JWT",
-        Scheme = "bearer"
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer"
     });
     opt.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
-        {
+         {
             new OpenApiSecurityScheme
             {
-                Reference = new OpenApiReference
+                Reference=new OpenApiReference
                 {
                     Type=ReferenceType.SecurityScheme,
                     Id="Bearer"
-                }
+                },
+                Scheme="oauth2",
+                Name="Bearer",
+                In=ParameterLocation.Header
             },
-            new string[]{}
+            new List<string>()
         }
     });
 });
@@ -51,10 +56,16 @@ builder.Services.AddSwaggerGen(opt =>
 builder.Services.AddDbContext<DataBaseContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddAuthentication();
+builder.Services.AddAuthentication("Bearer").
+    AddJwtBearer("Bearer", options =>
+    {
+        options.Authority = "https://localhost:44365/";
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateAudience = false
+        };
+    });
 builder.Services.AddAuthorization();
-
-builder.Services.ConfigureJWT(builder.Configuration);
 
 builder.Services.AddCors(o =>
 {
@@ -65,7 +76,9 @@ builder.Services.AddCors(o =>
 });
 
 builder.Services.AddResponseCaching();
-builder.Services.ConfigureAutoMapper();
+
+IMapper mapper = MapperInitializer.RegisterMaps().CreateMapper();
+builder.Services.AddSingleton(mapper);
 
 builder.Services.ConfigureVersioning();
 builder.Services.ConfigureHttpCacheHeaders();

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace StoreServiceAPI.Entities
 {
@@ -8,8 +9,8 @@ namespace StoreServiceAPI.Entities
         [Range(1, 500)]
         public string Name { get; set; }
 
-        [Key]
-        public int SapNumber { get; set; }
+        [Key, DatabaseGenerated(DatabaseGeneratedOption.None)]
+        public int SapNumber_id { get; set; }
 
         public string Abbreviation { get; set; }
 
