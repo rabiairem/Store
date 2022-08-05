@@ -1,6 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Versioning;
+using Microsoft.IdentityModel.Tokens;
+using StoreServiceAPI.Configurations;
 using System.Reflection;
+using System.Text;
 
 namespace StoreServiceAPI
 {
@@ -19,6 +24,8 @@ namespace StoreServiceAPI
 
         public static void ConfigureAutoMapper(this IServiceCollection services)
         {
+            IMapper mapper = MapperInitializer.RegisterMaps().CreateMapper();
+            services.AddSingleton(mapper);
             services.AddAutoMapper(Assembly.GetExecutingAssembly());
         }
     }

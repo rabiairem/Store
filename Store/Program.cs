@@ -46,15 +46,7 @@ builder.Services.AddSwaggerGen(opt =>
 builder.Services.AddDbContext<DataBaseContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("DefaultConnection")));
 
-builder.Services.AddAuthentication("Bearer").
-    AddJwtBearer("Bearer", options =>
-    {
-        options.Authority = "https://localhost:44365/";
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateAudience = false
-        };
-    });
+builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
 builder.Services.AddCors(o =>
@@ -65,10 +57,8 @@ builder.Services.AddCors(o =>
        AllowAnyHeader());
 });
 
-IMapper mapper = MapperInitializer.RegisterMaps().CreateMapper();
-builder.Services.AddSingleton(mapper);
-
 builder.Services.ConfigureVersioning();
+builder.Services.ConfigureAutoMapper();
 
 builder.Services.AddScoped<IStoreRepository, StoreRepository>();
 
