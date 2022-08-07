@@ -4,16 +4,11 @@ using StoreServiceAPI.DataAccess.Entities;
 
 namespace StoreServiceAPI.Configurations
 {
-    public class MapperInitializer
+    public class MapperInitializer : Profile
     {
-        public static MapperConfiguration RegisterMaps()
+        public MapperInitializer()
         {
-            var mappingConfig = new MapperConfiguration(config =>
-            {
-                config.CreateMap<Store, StoreDTO>().ForMember(store => store.SapNumber, s => s.MapFrom(src => src.SapNumber_id)).ReverseMap();
-            });
-
-            return mappingConfig;
+            CreateMap<Store, StoreDTO>().ForMember(store => store.SapNumber, s => s.MapFrom(src => src.SapNumber_id)).ReverseMap();
         }
     }
 }
