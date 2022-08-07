@@ -6,7 +6,7 @@ namespace StoreServiceAPI.DataAccess.Services
     public interface IStoreRepository
     {
         Task<IEnumerable<Store>> GetStoresAsync();
-        Task<Store> GetStoreByNameAndSapNumberAsync(int sapNumber, string name);
+        Task<Store> GetStoreBySapNumberAndNameAsync(int sapNumber, string name);
         Task<Store> GetStoreBySapNumberAsync(int sapNumber);
         Task<Store> CreateStoreAsync(StoreDTO storeDto);
         Task<IEnumerable<Store>> CreateStoresAsync(IEnumerable<StoreDTO> results);

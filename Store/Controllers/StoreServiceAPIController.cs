@@ -24,18 +24,21 @@ namespace StoreServiceAPI.Controllers
         public async Task<IActionResult> GetStores()
         {
             var stores = await _storeRepository.GetStoresAsync();
-            var results = _mapper.Map<IList<StoreDTO>>(stores);
+            var results = _mapper.Map<IEnumerable<StoreDTO>>(stores);
 
             return Ok(results);
         }
 
         [HttpGet("{id:int}/{name}", Name = "GetStore")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetStoreByNameAndSapNumber(int id, string name)
+        public async Task<IActionResult> GetStoreBySapNumberAndName(int id, string name)
         {
-            var store = await _storeRepository.GetStoreByNameAndSapNumberAsync(id, name);
+            var store = await _storeRepository.GetStoreBySapNumberAndNameAsync(id, name);
+
+            if (store == null)
+                return NotFound();
 
             return Ok(_mapper.Map<StoreDTO>(store));
         }
@@ -51,7 +54,7 @@ namespace StoreServiceAPI.Controllers
 
             var storeFromDb = await _storeRepository.CreateStoreAsync(storeDTO);
 
-            return Ok(_mapper.Map(storeFromDb, storeDTO));
+            return CreatedAtRoute("GetStore", new { id = storeFromDb.SapNumber_id, name = storeDTO.Name }, _mapper.Map<StoreDTO>(storeFromDb));
         }
 
         private async Task<IEnumerable<StoreDTO>> GetStoresFromJson()
@@ -69,7 +72,6 @@ namespace StoreServiceAPI.Controllers
 
         [HttpPost("CreateStoresFromJson", Name = "CreateStoresFromJson")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> CreateStoresFromJson()
         {
@@ -85,7 +87,7 @@ namespace StoreServiceAPI.Controllers
 
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> UpdateStore(int id, [FromBody] StoreDTO storeDTO)
         {
@@ -94,7 +96,7 @@ namespace StoreServiceAPI.Controllers
                 return BadRequest(ModelState);
             }
 
-            var store = await _storeRepository.GetStoreByNameAndSapNumberAsync(id, storeDTO.Name);
+            var store = await _storeRepository.GetStoreBySapNumberAndNameAsync(id, storeDTO.Name);
             if (store == null)
             {
                 return BadRequest("Submitted data is invalid");
@@ -106,8 +108,8 @@ namespace StoreServiceAPI.Controllers
         }
 
         [HttpDelete("{id:int}")]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> DeleteStore(int id)
         {
@@ -115,7 +117,7 @@ namespace StoreServiceAPI.Controllers
 
             if (store == null)
             {
-                return BadRequest("Submitted data is invalid");
+                return NotFound("Submitted data is invalid");
             }
 
             var result = await _storeRepository.DeleteStoreAsync(id);

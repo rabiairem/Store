@@ -62,7 +62,7 @@ namespace StoreServiceAPI.DataAccess.Services
             }
         }
 
-        public async Task<Store> GetStoreByNameAndSapNumberAsync(int storeSapNumber, string name)
+        public async Task<Store> GetStoreBySapNumberAndNameAsync(int storeSapNumber, string name)
         {
             Store store = await _db.Stores.Where(x => x.SapNumber_id ==
             storeSapNumber && x.Name == name).AsNoTracking().FirstOrDefaultAsync();
