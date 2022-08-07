@@ -117,7 +117,7 @@ namespace StoreServiceAPI.Controllers
 
             if (store == null)
             {
-                return NotFound("Submitted data is invalid");
+                return NotFound("Submitted data is not found");
             }
 
             var result = await _storeRepository.DeleteStoreAsync(id);
